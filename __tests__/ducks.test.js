@@ -343,7 +343,7 @@ describe("PATCH /api/ducks/:duck_id", () => {
     } = await request(app).patch("/api/ducks/649").send(foundDuck).expect(404);
     expect(msg).toBe("duck does not exist");
   });
-  test("400: returns error message when passed invalid field type", async () => {
+  test("400: returns error message when passed invalid finder_id", async () => {
     const foundDuck = {
       finder_id: "boo",
       location_found_lat: 38.7894166,
@@ -355,7 +355,21 @@ describe("PATCH /api/ducks/:duck_id", () => {
     const {
       body: { msg },
     } = await request(app).patch("/api/ducks/2").send(foundDuck).expect(400);
-    expect(msg).toBe("finder_id must be a number");
+    expect(msg).toBe("Invalid finder ID");
+  });
+  test("400: returns error message when passed invalid coordinate", async () => {
+    const foundDuck = {
+      finder_id: 3,
+      location_found_lat: 38.7894166,
+      location_found_lng: "Sheffield",
+      image:
+        "https://www.shutterstock.com/image-vector/yellow-duck-toy-inflatable-rubber-vector-1677879052",
+      comments: "I found a duck",
+    };
+    const {
+      body: { msg },
+    } = await request(app).patch("/api/ducks/2").send(foundDuck).expect(400);
+    expect(msg).toBe("Coordinates must be numbers");
   });
 });
 
@@ -387,7 +401,7 @@ describe("POST /api/ducks", () => {
       })
     );
   });
-  test("400: returns error message when passed invalid field", async () => {
+  test("400: returns error message when passed invalid coordinate", async () => {
     const newDuck = {
       duck_name: "Quacky",
       maker_id: 3,
@@ -399,9 +413,9 @@ describe("POST /api/ducks", () => {
     const {
       body: { msg },
     } = await request(app).post("/api/ducks").send(newDuck).expect(400);
-    expect(msg).toBe("location_placed_lat must be a number");
+    expect(msg).toBe("Coordinates must be numbers");
   });
-  test("400: returns error message when passed ", async () => {
+  test("400: returns error message when passed invalid maker_id", async () => {
     const newDuck = {
       duck_name: "Quacky",
       maker_id: "Becca",
@@ -460,5 +474,107 @@ describe("PATCH /api/ducks/unfound", () => {
         comments: "I found a duck",
       })
     );
+  });
+  test("404: returns error message when passed non-existent but valid duck name", async () => {
+    const updatedDuck = {
+      duck_name: "Test",
+      finder_id: 5,
+      location_found_lat: 53.488087,
+      location_found_lng: -10.022186,
+      image: "http://dummyimage.com/112x100.png/cc0000/ffffff",
+      comments: "I found a duck",
+    };
+    const {
+      body: { msg },
+    } = await request(app)
+      .patch("/api/ducks/unfound")
+      .send(updatedDuck)
+      .expect(404);
+    expect(msg).toBe("duck does not exist");
+  });
+  test("404: returns error message when passed non-existent but valid finder_id", async () => {
+    const updatedDuck = {
+      duck_name: "Kristan",
+      finder_id: 100,
+      location_found_lat: 53.488087,
+      location_found_lng: -10.022186,
+      image: "http://dummyimage.com/112x100.png/cc0000/ffffff",
+      comments: "I found a duck",
+    };
+    const {
+      body: { msg },
+    } = await request(app)
+      .patch("/api/ducks/unfound")
+      .send(updatedDuck)
+      .expect(404);
+    expect(msg).toBe("user does not exist");
+  });
+  test("400: returns error message when passed invalid finder_id", async () => {
+    const updatedDuck = {
+      duck_name: "Kristan",
+      finder_id: "User",
+      location_found_lat: 53.488087,
+      location_found_lng: -10.022186,
+      image: "http://dummyimage.com/112x100.png/cc0000/ffffff",
+      comments: "I found a duck",
+    };
+    const {
+      body: { msg },
+    } = await request(app)
+      .patch("/api/ducks/unfound")
+      .send(updatedDuck)
+      .expect(400);
+    expect(msg).toBe("Invalid finder ID");
+  });
+  test("400: returns error message when passed invalid duck_name", async () => {
+    const updatedDuck = {
+      duck_name: 36,
+      finder_id: 5,
+      location_found_lat: 53.488087,
+      location_found_lng: -10.022186,
+      image: "http://dummyimage.com/112x100.png/cc0000/ffffff",
+      comments: "I found a duck",
+    };
+    const {
+      body: { msg },
+    } = await request(app)
+      .patch("/api/ducks/unfound")
+      .send(updatedDuck)
+      .expect(400);
+    expect(msg).toBe("Invalid duck name");
+  });
+  test("400: returns error message when passed invalid coordinate", async () => {
+    const updatedDuck = {
+      duck_name: "Kristan",
+      finder_id: 5,
+      location_found_lat: "Yorkshire",
+      location_found_lng: -10.022186,
+      image: "http://dummyimage.com/112x100.png/cc0000/ffffff",
+      comments: "I found a duck",
+    };
+    const {
+      body: { msg },
+    } = await request(app)
+      .patch("/api/ducks/unfound")
+      .send(updatedDuck)
+      .expect(400);
+    expect(msg).toBe("Coordinates must be numbers");
+  });
+  test("400: returns error message when passed invalid type for string field type", async () => {
+    const updatedDuck = {
+      duck_name: "Kristan",
+      finder_id: 5,
+      location_found_lat: 53.488087,
+      location_found_lng: -10.022186,
+      image: "http://dummyimage.com/112x100.png/cc0000/ffffff",
+      comments: 54,
+    };
+    const {
+      body: { msg },
+    } = await request(app)
+      .patch("/api/ducks/unfound")
+      .send(updatedDuck)
+      .expect(400);
+    expect(msg).toBe("comments must be a string");
   });
 });
