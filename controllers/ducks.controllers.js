@@ -95,19 +95,14 @@ exports.patchDuckById = async (req, res, next) => {
       comments,
     } = req.body;
 
-    const numberTypes = [finder_id, location_found_lat, location_found_lng];
-    const numberFields = [
-      "finder_id",
-      "location_found_lat",
-      "location_found_lng",
-    ];
+    isNaN(finder_id)
+      ? await Promise.reject({ status: 400, msg: "Invalid finder ID" })
+      : await checkExists("users", "user_id", finder_id);
+
+    await checkCoordinates(location_found_lat, location_found_lng);
 
     const stringTypes = [image, comments];
     const stringFields = ["image", "comments"];
-
-    if (numberTypes.some((item) => isNaN(item))) {
-      await typeChecker(numberTypes, numberFields, "number");
-    }
 
     if (stringTypes.some((item) => !isNaN(item))) {
       await typeChecker(stringTypes, stringFields, "string");
@@ -135,15 +130,10 @@ exports.postDuckByMakerId = async (req, res, next) => {
       ? await Promise.reject({ status: 400, msg: "Invalid maker ID" })
       : await checkExists("users", "user_id", maker_id);
 
-    const numberTypes = [location_placed_lat, location_placed_lng];
-    const numberFields = ["location_placed_lat", "location_placed_lng"];
-
     const stringTypes = [duck_name, clue];
     const stringFields = ["duck_name", "clue"];
 
-    if (numberTypes.some((item) => isNaN(item))) {
-      await typeChecker(numberTypes, numberFields, "number");
-    }
+    await checkCoordinates(location_placed_lat, location_placed_lng);
 
     if (stringTypes.some((item) => !isNaN(item))) {
       await typeChecker(stringTypes, stringFields, "string");
@@ -168,27 +158,25 @@ exports.patchDuckByName = async (req, res, next) => {
       comments,
     } = req.body;
 
-    await checkExists("ducks", "duck_name", duck_name);
+    !isNaN(duck_name)
+      ? await Promise.reject({ status: 400, msg: "Invalid duck name" })
+      : await checkExists("ducks", "duck_name", duck_name);
 
-    const numberTypes = [finder_id, location_found_lat, location_found_lng];
-    const numberFields = [
-      "finder_id",
-      "location_found_lat",
-      "location_found_lng",
-    ];
+    isNaN(finder_id)
+      ? await Promise.reject({ status: 400, msg: "Invalid finder ID" })
+      : await checkExists("users", "user_id", finder_id);
 
     const stringTypes = [image, comments];
     const stringFields = ["image", "comments"];
 
-    if (numberTypes.some((item) => isNaN(item))) {
-      await typeChecker(numberTypes, numberFields, "number");
-    }
+    await checkCoordinates(location_found_lat, location_found_lng);
 
     if (stringTypes.some((item) => !isNaN(item))) {
       await typeChecker(stringTypes, stringFields, "string");
     }
 
     const duck = await updateDuckByName(req.body);
+
     res.status(200).send({ duck });
   } catch (err) {
     next(err);
