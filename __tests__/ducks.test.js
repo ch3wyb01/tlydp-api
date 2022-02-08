@@ -3,10 +3,19 @@ const testData = require("../db/data/test-data/index");
 const seed = require("../db/seeds/seed");
 const request = require("supertest");
 const app = require("../app");
-const { expect } = require("@jest/globals");
+const { endpointsDescription } = require("../endpoints");
 
 beforeEach(() => seed(testData));
 afterAll(() => db.end());
+
+describe("GET /api", () => {
+  test("200: returns object describing all endpoints", async () => {
+    const {
+      body: { endpoints },
+    } = await request(app).get("/api").expect(200);
+    expect(endpoints).toEqual(endpointsDescription);
+  });
+});
 
 describe("GET /api/ducks", () => {
   test("200: returns array of all ducks with all properties", async () => {
