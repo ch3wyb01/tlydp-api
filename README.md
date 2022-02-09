@@ -3,6 +3,9 @@
 - The project aims to increase awareness about blood, bone marrow, tissue and organ donation through the making and placing of knitted yellow ducks
 - When a user finds a duck, they can log it on the map
 
+Hosted version: https://tlydp.herokuapp.com/api
+Frontend repo: https://github.com/ch3wyb01/tlydp
+
 ## How to run locally:
 
 ### Clone the repo:
